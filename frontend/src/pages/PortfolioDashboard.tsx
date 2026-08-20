@@ -56,7 +56,7 @@ export function PortfolioDashboard({ onSelectCompany }: { onSelectCompany: (id: 
           {risk.data?.companies_requiring_review.map((item) => (
             <button key={item.company_id} onClick={() => onSelectCompany(item.company_id)} className="rounded-md border border-line p-3 text-left hover:bg-slate-50">
               <div className="font-semibold text-ink">{item.company_name}</div>
-              <div className="mt-1 text-sm text-slate-500">{item.exception_count} exceptions · score {item.risk_score}</div>
+              <div className="mt-1 text-sm text-slate-500">{item.exception_count} exceptions | score {item.risk_score}</div>
             </button>
           ))}
           {!risk.data?.companies_requiring_review.length ? <div className="text-sm text-slate-500">Seed data to calculate review rankings.</div> : null}

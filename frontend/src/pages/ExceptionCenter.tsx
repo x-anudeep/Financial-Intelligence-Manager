@@ -44,7 +44,7 @@ export function ExceptionCenter({ onOpenCompany }: { onOpenCompany: (id: number)
             <SeverityBadge severity={item.severity} />
             <div>
               <div className="font-semibold text-ink">{item.title}</div>
-              <div className="text-sm text-slate-500">{item.company_name} · {item.period} · {item.metric}</div>
+              <div className="text-sm text-slate-500">{item.company_name} | {item.period} | {item.metric}</div>
             </div>
             <div className="text-sm">
               <div>{money(item.current_value)}</div>

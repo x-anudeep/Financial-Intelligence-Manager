@@ -1,4 +1,5 @@
 import random
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -97,7 +98,8 @@ def seed_database(db: Session) -> dict:
     reset_database(db)
     df = generate_synthetic_financials()
     result = ingest_dataframe(db, df)
-    data_dir = Path(__file__).resolve().parents[3] / "data"
+    configured = os.getenv("SAMPLE_DATA_DIR")
+    data_dir = Path(configured) if configured else Path(__file__).resolve().parents[3] / "data"
     data_dir.mkdir(exist_ok=True)
     df.to_csv(data_dir / "sample_financials.csv", index=False)
     return result

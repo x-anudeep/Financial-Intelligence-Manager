@@ -29,6 +29,11 @@ def seed(db: Session = Depends(get_db)) -> dict:
     return result
 
 
+@router.post("/demo/reset")
+def reset_demo(db: Session = Depends(get_db)) -> dict:
+    return seed(db)
+
+
 @router.get("/companies", response_model=list[CompanySummary])
 def list_companies(db: Session = Depends(get_db)) -> list[dict]:
     companies = db.scalars(select(Company).order_by(Company.name)).all()
