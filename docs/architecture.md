@@ -11,6 +11,7 @@ The platform uses deterministic backend services for financial calculations and 
 - Explainable exception detection lives in `backend/app/anomaly_engine`.
 - RAG services live in `backend/app/rag` and use local TF-IDF retrieval for no-key operation.
 - AI services live behind `backend/app/ai` abstractions.
+- Docker can run SQLite demo mode or a PostgreSQL service using the `pgvector/pgvector:pg16` image.
 
 ## Frontend
 
@@ -22,3 +23,5 @@ The platform uses deterministic backend services for financial calculations and 
 ## AI Boundary
 
 LLMs never calculate ratios, growth rates, or anomaly thresholds. The AI layer explains and summarizes data already calculated by backend services and cites retrieved document chunks when document context is used.
+
+When `OPENAI_API_KEY` is set, narrative synthesis uses the Responses API. When it is missing or unavailable, the system falls back to deterministic structured responses.

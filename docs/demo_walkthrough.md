@@ -1,6 +1,6 @@
 # Demo Walkthrough
 
-1. Start the backend and frontend.
+1. Start the backend and frontend with `BACKEND_PORT=8010 FRONTEND_PORT=5173 ./scripts/launch_local.sh`.
 2. Open `http://localhost:5173`.
 3. Click `Seed Demo Data`.
 4. Review portfolio metrics, severity distribution, and companies requiring review.

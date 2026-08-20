@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: financial
+      POSTGRES_PASSWORD: financial
+      POSTGRES_DB: financial_intelligence
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  backend:
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg://financial:financial@postgres:5432/financial_intelligence
+
+volumes:
+  postgres-data:

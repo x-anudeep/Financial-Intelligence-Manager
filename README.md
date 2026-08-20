@@ -66,12 +66,20 @@ Do not commit real API keys. `.env` is ignored.
 
 ## Running Locally
 
+One-command launch:
+
+```bash
+BACKEND_PORT=8010 FRONTEND_PORT=5173 ./scripts/launch_local.sh
+```
+
+Then open `http://localhost:5173`.
+
 Backend:
 
 ```bash
 source .venv/bin/activate
 cd backend
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8010
 ```
 
 Frontend:
@@ -85,11 +93,21 @@ Open `http://localhost:5173` and click `Seed Demo Data`.
 
 ## Docker
 
+SQLite demo mode:
+
 ```bash
-docker compose up --build
+./scripts/launch_docker.sh
 ```
 
 The frontend runs on `http://localhost:5173`; the API runs on `http://localhost:8000`.
+
+PostgreSQL plus pgvector-ready database:
+
+```bash
+USE_POSTGRES=1 ./scripts/launch_docker.sh
+```
+
+The PostgreSQL service uses the `pgvector/pgvector:pg16` image. The MVP retrieval layer still has a local TF-IDF fallback so demos work without external embedding credentials.
 
 ## Data Model
 
@@ -127,6 +145,8 @@ The rule engine stores current values, prior values, calculated changes, severit
 Uploaded PDF/TXT documents are extracted, chunked, stored, and searched with local semantic retrieval. Responses include source references. The AI layer can summarize and explain validated structured data, but it never overrides deterministic calculations.
 
 If `OPENAI_API_KEY` is not configured, the copilot still returns structured findings and retrieved sources.
+
+With an API key configured, the copilot uses OpenAI's Responses API for narrative synthesis over the deterministic structured findings and retrieved document sources.
 
 ## API Overview
 
