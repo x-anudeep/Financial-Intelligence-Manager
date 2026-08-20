@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.financial import Company
 from app.schemas.anomaly import AnomalyOut, CompanyComparison, PortfolioRiskOverview
+from app.schemas.document import AnalystAnswer, AnalystQuestion, DocumentOut, SupportingContextRequest
 from app.schemas.financial import CompanyDetail, CompanySummary
+from app.rag.retrieval import search_company_documents
+from app.services.analyst import analyst_summary, answer_question, supporting_context_for_anomaly
 from app.services.anomalies import compare_companies, list_anomalies, list_company_anomalies, portfolio_risk_overview, run_all_anomalies, run_company_anomalies
+from app.services.documents import list_documents, upload_document
 from app.services.financials import company_metric_rows, company_summary, ingest_upload
 from app.services.seed import seed_database
 
@@ -89,3 +93,42 @@ def get_company_comparison(company_ids: list[int] = Query(default=[]), db: Sessi
     if len(company_ids) < 2:
         raise HTTPException(status_code=400, detail="Select at least two companies to compare.")
     return compare_companies(db, company_ids)
+
+
+@router.post("/companies/{company_id}/documents")
+async def upload_supporting_document(company_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    try:
+        return upload_document(db, company_id, file.filename or "document.txt", await file.read())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/companies/{company_id}/documents", response_model=list[DocumentOut])
+def get_documents(company_id: int, db: Session = Depends(get_db)):
+    return list_documents(db, company_id)
+
+
+@router.get("/companies/{company_id}/documents/search")
+def search_documents(company_id: int, q: str, db: Session = Depends(get_db)) -> dict:
+    return {"sources": search_company_documents(db, company_id, q)}
+
+
+@router.get("/companies/{company_id}/analyst-summary", response_model=AnalystAnswer)
+def get_analyst_summary(company_id: int, db: Session = Depends(get_db)) -> dict:
+    try:
+        return analyst_summary(db, company_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/assistant/ask", response_model=AnalystAnswer)
+def ask_analyst(payload: AnalystQuestion, db: Session = Depends(get_db)) -> dict:
+    return answer_question(db, payload.company_id, payload.question)
+
+
+@router.post("/anomalies/supporting-context", response_model=AnalystAnswer)
+def find_supporting_context(payload: SupportingContextRequest, db: Session = Depends(get_db)) -> dict:
+    try:
+        return supporting_context_for_anomaly(db, payload.anomaly_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

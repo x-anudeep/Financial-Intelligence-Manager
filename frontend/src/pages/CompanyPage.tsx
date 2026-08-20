@@ -1,13 +1,17 @@
 import { ArrowLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { CashDebtChart, MarginChart, RevenueEbitdaChart } from "../charts/FinancialCharts";
+import { AnalystCopilot } from "../components/AnalystCopilot";
+import { DocumentPanel } from "../components/DocumentPanel";
 import { KpiCard } from "../components/KpiCard";
 import { SeverityBadge } from "../components/SeverityBadge";
+import { SourceList } from "../components/SourceList";
 import { money, number, percent } from "../utils/format";
 
 export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: () => void }) {
   const company = useQuery({ queryKey: ["company", companyId], queryFn: () => api.company(companyId) });
+  const supportingContext = useMutation({ mutationFn: (anomalyId: number) => api.supportingContext(anomalyId) });
   const latest = company.data?.metrics.at(-1);
 
   if (company.isLoading) return <main className="p-6 text-sm text-slate-500">Loading company financials...</main>;
@@ -71,11 +75,16 @@ export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: 
         </section>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        <DocumentPanel companyId={companyId} />
+        <AnalystCopilot companyId={companyId} />
+      </div>
+
       <section className="rounded-md border border-line bg-white shadow-sm">
         <div className="border-b border-line px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Risk / Anomaly Timeline</div>
         <div className="divide-y divide-line">
           {company.data.anomalies.map((item) => (
-            <div key={item.id} className="grid gap-3 px-4 py-4 lg:grid-cols-[120px_1fr_2fr_1.2fr]">
+            <div key={item.id} className="grid gap-3 px-4 py-4 lg:grid-cols-[120px_1fr_2fr_1.2fr_180px]">
               <SeverityBadge severity={item.severity} />
               <div>
                 <div className="font-semibold text-ink">{item.title}</div>
@@ -83,11 +92,20 @@ export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: 
               </div>
               <div className="text-sm text-slate-600">{item.evidence}</div>
               <div className="whitespace-pre-line text-sm text-slate-600">{item.suggested_review}</div>
+              <button onClick={() => supportingContext.mutate(item.id)} className="h-9 rounded-md border border-line px-3 text-sm font-medium hover:bg-slate-50">Find Context</button>
             </div>
           ))}
           {!company.data.anomalies.length ? <div className="p-5 text-sm text-slate-500">No exceptions currently detected for this company.</div> : null}
         </div>
       </section>
+
+      {supportingContext.data ? (
+        <section className="rounded-md border border-line bg-white p-4 shadow-sm">
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Structured Finding + Document Context</h3>
+          <div className="mb-4 rounded-md bg-slate-50 p-3 text-sm text-slate-700">{supportingContext.data.answer}</div>
+          <SourceList sources={supportingContext.data.sources} />
+        </section>
+      ) : null}
     </main>
   );
 }

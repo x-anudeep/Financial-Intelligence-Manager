@@ -80,3 +80,28 @@ export type ComparisonRow = {
   exception_count: number;
   latest_revenue?: number | null;
 };
+
+export type RetrievedContext = {
+  document_id: number;
+  document_name: string;
+  chunk_id: number;
+  content: string;
+  score: number;
+  page?: string | null;
+  section?: string | null;
+};
+
+export type AnalystAnswer = {
+  answer: string;
+  ai_enabled: boolean;
+  structured_findings: Array<Record<string, unknown>>;
+  sources: RetrievedContext[];
+};
+
+export type DocumentRecord = {
+  id: number;
+  company_id: number;
+  file_name: string;
+  document_type: string;
+  processing_status: string;
+};
