@@ -1,0 +1,17 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/financial_intelligence.db
+financial_intelligence.db
+backend/uploads/
+backend/chroma/
+node_modules/
+dist/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+.DS_Store
+*.log
