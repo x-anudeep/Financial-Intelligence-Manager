@@ -23,7 +23,7 @@ echo "Starting backend on http://localhost:${BACKEND_PORT}"
 BACKEND_PID=$!
 
 echo "Starting frontend on http://localhost:${FRONTEND_PORT}"
-(cd frontend && VITE_API_BASE_URL="http://localhost:${BACKEND_PORT}/api" npm run dev -- --host 0.0.0.0 --port "$FRONTEND_PORT") &
+(cd frontend && npm run dev -- --host 0.0.0.0 --port "$FRONTEND_PORT") &
 FRONTEND_PID=$!
 
 trap 'kill "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true' EXIT

@@ -45,11 +45,11 @@ def run_company_anomalies(db: Session, company_id: int) -> list[dict]:
 
 
 def run_all_anomalies(db: Session) -> dict:
-    companies = db.scalars(select(Company)).all()
+    company_ids = db.scalars(select(Company.id)).all()
     total = 0
-    for company in companies:
-        total += len(run_company_anomalies(db, company.id))
-    return {"companies": len(companies), "anomalies": total}
+    for company_id in company_ids:
+        total += len(run_company_anomalies(db, company_id))
+    return {"companies": len(company_ids), "anomalies": total}
 
 
 def list_company_anomalies(db: Session, company_id: int) -> list[dict]:

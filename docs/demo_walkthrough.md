@@ -1,14 +1,20 @@
-# Demo Walkthrough
+# Simple Demo Walkthrough
 
-1. Start the backend and frontend with `BACKEND_PORT=8010 FRONTEND_PORT=5173 ./scripts/launch_local.sh`.
+1. Start the app with `BACKEND_PORT=8010 FRONTEND_PORT=5173 ./scripts/launch_local.sh`.
 2. Open `http://localhost:5173`.
-3. Click `Seed Demo Data`.
-4. Review portfolio metrics, severity distribution, and companies requiring review.
-5. Open a company.
-6. Inspect revenue, EBITDA, cash, debt, margin, and working-capital trends.
-7. Review the anomaly timeline.
-8. Upload `sample_documents/management_receivables_update.txt`.
-9. Click `Find Context` on a receivables, cash, inventory, or leverage anomaly.
-10. Ask the copilot: `What does management say about receivables?`
-11. Return to the portfolio and compare two to five companies.
-12. Upload `data/sample_financials.csv` to rerun normalization, calculations, and anomaly detection.
+3. In the Real Data Agent, type a US public company name or ticker, for example `Apple`, `JPM`, or `Bank of America`.
+4. The app fetches public SEC filing data, creates a CSV, stores the financial metrics, and refreshes the dashboard.
+5. Open the company page.
+6. Explain the top cards and charts:
+   - normal companies show revenue, EBITDA, debt, cash, margin, and ratios.
+   - banks show deposits, loans, net interest income, ROA, ROE, and efficiency ratio.
+7. Show the anomaly timeline. Each anomaly has evidence and suggested review steps.
+8. Upload a supporting PDF/TXT document if available.
+9. Click `Find Context` on an anomaly to search documents for possible explanation.
+10. Ask the copilot a simple question, for example `What are the biggest risks?`
+
+## One-Minute Explanation
+
+This project helps an analyst quickly review company financial data. Instead of manually reading many rows in a spreadsheet, the app fetches or uploads financial data, calculates key ratios, highlights unusual movements, and lets the user search supporting documents for context.
+
+The important point is that the calculations and anomaly detection are rule-based and deterministic. The optional LLM only explains already-calculated findings in simple language.

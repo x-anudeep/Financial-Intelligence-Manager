@@ -6,6 +6,8 @@ __pycache__/
 .pytest_cache/
 backend/financial_intelligence.db
 financial_intelligence.db
+*.db.bak_*
+*.db.real_fetch_backup_*
 backend/uploads/
 backend/chroma/
 node_modules/

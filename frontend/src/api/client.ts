@@ -1,18 +1,31 @@
 import type { AnalystAnswer, Anomaly, CompanyDetail, CompanySummary, ComparisonRow, DocumentRecord, PortfolioRisk } from "../types/financial";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
+function apiBases() {
+  if (import.meta.env.VITE_API_BASE_URL) return [import.meta.env.VITE_API_BASE_URL];
+  const host = window.location.hostname || "localhost";
+  return ["/api", `${window.location.protocol}//${host}:8010/api`, "http://localhost:8010/api"];
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, options);
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body.detail ?? `Request failed: ${response.status}`);
+  const errors: string[] = [];
+  for (const base of apiBases()) {
+    try {
+      const response = await fetch(`${base}${path}`, options);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail ?? `Request failed: ${response.status}`);
+      }
+      return response.json() as Promise<T>;
+    } catch (error) {
+      errors.push(`${base}${path}: ${error instanceof Error ? error.message : "Failed to fetch"}`);
+    }
   }
-  return response.json() as Promise<T>;
+  throw new Error(`Could not reach the backend. Tried ${errors.join(" | ")}`);
 }
 
 export const api = {
   seed: () => request<{ rows: number; companies: string[] }>("/seed", { method: "POST" }),
+  loadArchive: () => request<{ rows: number; companies: string[]; metrics: string[]; source_dir: string }>("/archive/load", { method: "POST" }),
   companies: () => request<CompanySummary[]>("/companies"),
   company: (id: number) => request<CompanyDetail>(`/companies/${id}`),
   anomalies: (params = "") => request<Anomaly[]>(`/anomalies${params}`),
@@ -42,5 +55,8 @@ export const api = {
       method: "POST",
       body: formData
     });
-  }
+  },
+  fetchSecFinancials: (query: string) => request<{ rows: number; companies: string[]; metrics: string[]; company: string; ticker: string; cik: string; csv_path: string; source: string }>(`/financials/fetch-sec?query=${encodeURIComponent(query)}`, {
+    method: "POST"
+  })
 };

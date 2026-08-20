@@ -7,17 +7,19 @@ export function SeverityDistribution({ risk }: { risk?: PortfolioRisk }) {
   const data = Object.entries(risk?.severity_distribution ?? {}).map(([name, value]) => ({ name, value }));
   return (
     <ChartFrame title="Anomaly Severity Distribution">
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="value">
-            {data.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      {data.length ? (
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis dataKey="name" stroke="#94a3b8" />
+            <YAxis allowDecimals={false} stroke="#94a3b8" />
+            <Tooltip />
+            <Bar dataKey="value">
+              {data.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      ) : <EmptyChart text="No exceptions detected yet." />}
     </ChartFrame>
   );
 }
@@ -26,16 +28,18 @@ export function CategoryDistribution({ risk }: { risk?: PortfolioRisk }) {
   const data = Object.entries(risk?.anomaly_categories ?? {}).map(([name, value]) => ({ name, value }));
   return (
     <ChartFrame title="Most Common Anomaly Categories">
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" hide />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="value" fill="#2563eb" />
-        </BarChart>
-      </ResponsiveContainer>
+      {data.length ? (
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis dataKey="name" hide />
+            <YAxis allowDecimals={false} stroke="#94a3b8" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="value" fill="#38bdf8" />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : <EmptyChart text="No anomaly categories to chart." />}
     </ChartFrame>
   );
 }
@@ -59,9 +63,13 @@ export function LeverageMarginScatter({ data }: { data: ComparisonRow[] }) {
 
 function ChartFrame({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-md border border-line bg-white p-4 shadow-sm">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">{title}</h3>
+    <section className="rounded-md border border-slate-800 bg-slate-900/80 p-4 shadow-sm shadow-black/20">
+      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-300">{title}</h3>
       {children}
     </section>
   );
+}
+
+function EmptyChart({ text }: { text: string }) {
+  return <div className="flex h-[220px] items-center justify-center rounded-md border border-dashed border-slate-700 bg-slate-950/30 text-sm text-slate-500">{text}</div>;
 }

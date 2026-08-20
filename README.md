@@ -1,6 +1,6 @@
 # Financial Statement Intelligence & Exception Detection Platform
 
-Professional analyst decision-support software for ingesting company financial statements, normalizing labels, calculating financial metrics, detecting exceptions, visualizing trends, and retrieving supporting context from uploaded documents.
+Analyst decision-support software for fetching or uploading company financial data, calculating financial metrics, detecting exceptions, visualizing trends, and retrieving supporting context from uploaded documents.
 
 The platform does not detect fraud or make investment/credit decisions. It identifies unusual financial movements that require analyst review.
 
@@ -16,14 +16,15 @@ See [docs/architecture.md](docs/architecture.md).
 - Frontend: React, TypeScript, Vite, Tailwind CSS, Recharts, TanStack Query
 - Database: SQLite for local development, with PostgreSQL-ready SQLAlchemy boundaries
 - RAG: local TF-IDF retrieval fallback for dependable no-key demos
-- AI: LLM abstraction controlled by `OPENAI_API_KEY`
+- AI: optional LLM abstraction controlled by `GEMINI_API_KEY` or `OPENAI_API_KEY`
 - Infrastructure: Docker and Docker Compose
 
 ## Features
 
 - CSV/XLSX financial upload and validation
 - Financial label normalization
-- Synthetic dataset for 36 companies across varied profiles
+- Real-data agent for US public companies using SEC EDGAR CompanyFacts
+- CSV/XLSX upload for custom financial data
 - Deterministic financial ratio engine
 - Explainable rule-based anomaly detection
 - Lightweight z-score statistical detection when enough history exists
@@ -58,8 +59,12 @@ npm install
 ```bash
 DATABASE_URL=sqlite:///./financial_intelligence.db
 FRONTEND_ORIGIN=http://localhost:5173
+LLM_PROVIDER=auto
 OPENAI_API_KEY=
-VITE_API_BASE_URL=http://localhost:8000/api
+OPENAI_MODEL=gpt-4.1-mini
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-1.5-flash
+VITE_API_BASE_URL=
 ```
 
 Do not commit real API keys. `.env` is ignored.
@@ -89,7 +94,7 @@ cd frontend
 npm run dev
 ```
 
-Open `http://localhost:5173` and click `Seed Demo Data`.
+Open `http://localhost:5173` and use the Real Data Agent. Try `Apple`, `JPM`, or `Bank of America`.
 
 ## Docker
 
@@ -144,9 +149,9 @@ The rule engine stores current values, prior values, calculated changes, severit
 
 Uploaded PDF/TXT documents are extracted, chunked, stored, and searched with local semantic retrieval. Responses include source references. The AI layer can summarize and explain validated structured data, but it never overrides deterministic calculations.
 
-If `OPENAI_API_KEY` is not configured, the copilot still returns structured findings and retrieved sources.
+If no LLM API key is configured, the copilot still returns structured findings and retrieved sources.
 
-With an API key configured, the copilot uses OpenAI's Responses API for narrative synthesis over the deterministic structured findings and retrieved document sources.
+With a Gemini or OpenAI API key configured, the copilot uses the LLM for narrative synthesis over the deterministic structured findings and retrieved document sources.
 
 ## API Overview
 
@@ -158,13 +163,15 @@ See [docs/demo_walkthrough.md](docs/demo_walkthrough.md).
 
 Recommended demo:
 
-1. Seed demo data.
-2. Open a company requiring review.
-3. Inspect financial charts and anomalies.
-4. Upload [sample_documents/management_receivables_update.txt](sample_documents/management_receivables_update.txt).
-5. Click `Find Context`.
-6. Ask the copilot about receivables or debt.
-7. Compare two to five companies.
+1. Open the dashboard.
+2. Type `Apple`, `JPM`, or `Bank of America` in the Real Data Agent.
+3. Open the company page.
+4. Inspect financial charts, ratios, and anomalies.
+5. Upload a supporting PDF/TXT document.
+6. Click `Find Context`.
+7. Ask the copilot a simple question such as `What are the biggest risks?`
+
+For a simple presentation script, see [docs/project_brief_for_demo.md](docs/project_brief_for_demo.md).
 
 ## Upload Format
 

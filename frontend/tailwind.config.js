@@ -3,10 +3,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#172033",
-        line: "#d8dee8",
-        panel: "#ffffff",
-        accent: "#2563eb"
+        ink: "#e5edf7",
+        line: "#243247",
+        panel: "#0f1726",
+        accent: "#38bdf8"
       }
     }
   },

@@ -41,6 +41,43 @@ export function CashDebtChart({ data }: { data: MetricPoint[] }) {
   );
 }
 
+export function BankIncomeChart({ data }: { data: MetricPoint[] }) {
+  return (
+    <ChartFrame title="Bank Revenue Mix">
+      <ResponsiveContainer width="100%" height={260}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="period" />
+          <YAxis tickFormatter={axisMoney} />
+          <Tooltip formatter={(value) => axisMoney(Number(value))} />
+          <Legend />
+          <Line type="monotone" dataKey="net_interest_income" name="net interest income" stroke="#38bdf8" strokeWidth={2} />
+          <Line type="monotone" dataKey="noninterest_income" name="noninterest income" stroke="#a78bfa" strokeWidth={2} />
+          <Line type="monotone" dataKey="net_income" name="net income" stroke="#22c55e" strokeWidth={2} />
+        </LineChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  );
+}
+
+export function BankBalanceSheetChart({ data }: { data: MetricPoint[] }) {
+  return (
+    <ChartFrame title="Deposits and Loans">
+      <ResponsiveContainer width="100%" height={260}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="period" />
+          <YAxis tickFormatter={axisMoney} />
+          <Tooltip formatter={(value) => axisMoney(Number(value))} />
+          <Legend />
+          <Bar dataKey="deposits" fill="#0f766e" />
+          <Bar dataKey="loans" fill="#2563eb" />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartFrame>
+  );
+}
+
 export function MarginChart({ data }: { data: MetricPoint[] }) {
   const marginData = data.map((row) => ({ ...row, ebitda_margin_pct: row.ebitda_margin == null ? null : row.ebitda_margin * 100 }));
   return (
@@ -60,8 +97,8 @@ export function MarginChart({ data }: { data: MetricPoint[] }) {
 
 function ChartFrame({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-md border border-line bg-white p-4 shadow-sm">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">{title}</h3>
+    <section className="rounded-md border border-slate-800 bg-slate-900/80 p-4 shadow-sm shadow-black/20">
+      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-300">{title}</h3>
       {children}
     </section>
   );

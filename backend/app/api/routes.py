@@ -11,7 +11,8 @@ from app.rag.retrieval import search_company_documents
 from app.services.analyst import analyst_summary, answer_question, supporting_context_for_anomaly
 from app.services.anomalies import compare_companies, list_anomalies, list_company_anomalies, portfolio_risk_overview, run_all_anomalies, run_company_anomalies
 from app.services.documents import list_documents, upload_document
-from app.services.financials import company_metric_rows, company_summary, ingest_upload
+from app.services.financials import company_metric_rows, company_summary, ingest_archive_dataset, ingest_upload
+from app.services.sec_data import fetch_sec_company
 from app.services.seed import seed_database
 
 router = APIRouter(prefix="/api")
@@ -27,6 +28,16 @@ def seed(db: Session = Depends(get_db)) -> dict:
     result = seed_database(db)
     result["anomaly_run"] = run_all_anomalies(db)
     return result
+
+
+@router.post("/archive/load")
+def load_archive_dataset(db: Session = Depends(get_db)) -> dict:
+    try:
+        result = ingest_archive_dataset(db)
+        result["anomaly_run"] = run_all_anomalies(db)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/demo/reset")
@@ -56,6 +67,16 @@ async def upload_financials(file: UploadFile = File(...), db: Session = Depends(
     try:
         content = await file.read()
         result = ingest_upload(db, content, file.filename or "upload.csv")
+        result["anomaly_run"] = run_all_anomalies(db)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/financials/fetch-sec")
+def fetch_sec_financials(query: str, db: Session = Depends(get_db)) -> dict:
+    try:
+        result = fetch_sec_company(db, query)
         result["anomaly_run"] = run_all_anomalies(db)
         return result
     except ValueError as exc:
