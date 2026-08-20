@@ -34,4 +34,49 @@ export type CompanySummary = {
 
 export type CompanyDetail = CompanySummary & {
   metrics: MetricPoint[];
+  anomalies: Anomaly[];
+};
+
+export type Anomaly = {
+  id: number;
+  company_id: number;
+  company_name?: string | null;
+  period: string;
+  anomaly_type: string;
+  metric: string;
+  severity: "low" | "medium" | "high" | "critical" | string;
+  title: string;
+  description: string;
+  current_value?: number | null;
+  previous_value?: number | null;
+  percentage_change?: number | null;
+  evidence: string;
+  suggested_review: string;
+  anomaly_score?: number | null;
+  method: string;
+  supporting_statistics?: string | null;
+};
+
+export type PortfolioRisk = {
+  total_companies: number;
+  total_anomalies: number;
+  high_risk_exceptions: number;
+  critical_exceptions: number;
+  severity_distribution: Record<string, number>;
+  anomaly_categories: Record<string, number>;
+  companies_requiring_review: Array<{ company_id: number; company_name: string; risk_score: number; exception_count: number }>;
+};
+
+export type ComparisonRow = {
+  company_id: number;
+  name: string;
+  industry: string;
+  revenue_growth?: number | null;
+  ebitda_margin?: number | null;
+  debt_to_ebitda?: number | null;
+  operating_cash_conversion?: number | null;
+  current_ratio?: number | null;
+  working_capital_growth?: number | null;
+  exception_count: number;
+  latest_revenue?: number | null;
 };

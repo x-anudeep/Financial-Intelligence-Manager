@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
 from app.database.session import Base, engine
+from app.models import anomaly  # noqa: F401
 from app.models import financial  # noqa: F401
 from app.settings import settings
 

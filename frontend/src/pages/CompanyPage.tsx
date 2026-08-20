@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { CashDebtChart, MarginChart, RevenueEbitdaChart } from "../charts/FinancialCharts";
 import { KpiCard } from "../components/KpiCard";
+import { SeverityBadge } from "../components/SeverityBadge";
 import { money, number, percent } from "../utils/format";
 
 export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: () => void }) {
@@ -21,7 +22,7 @@ export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: 
             <ArrowLeft size={16} /> Portfolio
           </button>
           <h1 className="text-3xl font-semibold text-ink">{company.data.name}</h1>
-          <p className="mt-1 text-sm text-slate-600">{company.data.industry} · Latest period {company.data.latest_period ?? "N/A"}</p>
+          <p className="mt-1 text-sm text-slate-600">{company.data.industry} · Latest period {company.data.latest_period ?? "N/A"} · {company.data.anomalies.length} exceptions</p>
         </div>
       </div>
 
@@ -69,6 +70,24 @@ export function CompanyPage({ companyId, onBack }: { companyId: number; onBack: 
           </div>
         </section>
       </div>
+
+      <section className="rounded-md border border-line bg-white shadow-sm">
+        <div className="border-b border-line px-4 py-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Risk / Anomaly Timeline</div>
+        <div className="divide-y divide-line">
+          {company.data.anomalies.map((item) => (
+            <div key={item.id} className="grid gap-3 px-4 py-4 lg:grid-cols-[120px_1fr_2fr_1.2fr]">
+              <SeverityBadge severity={item.severity} />
+              <div>
+                <div className="font-semibold text-ink">{item.title}</div>
+                <div className="text-sm text-slate-500">{item.period} · {item.metric} · {item.method}</div>
+              </div>
+              <div className="text-sm text-slate-600">{item.evidence}</div>
+              <div className="whitespace-pre-line text-sm text-slate-600">{item.suggested_review}</div>
+            </div>
+          ))}
+          {!company.data.anomalies.length ? <div className="p-5 text-sm text-slate-500">No exceptions currently detected for this company.</div> : null}
+        </div>
+      </section>
     </main>
   );
 }

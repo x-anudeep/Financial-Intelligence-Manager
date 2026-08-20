@@ -47,3 +47,4 @@ class CompanySummary(BaseModel):
 
 class CompanyDetail(CompanySummary):
     metrics: list[MetricPoint]
+    anomalies: list[dict] = []

@@ -1,14 +1,18 @@
 import { Building2, Database, Upload } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
+import { CategoryDistribution, SeverityDistribution } from "../charts/RiskCharts";
 import { KpiCard } from "../components/KpiCard";
+import { ComparisonPage } from "./ComparisonPage";
+import { ExceptionCenter } from "./ExceptionCenter";
 import { money, percent } from "../utils/format";
 
 export function PortfolioDashboard({ onSelectCompany }: { onSelectCompany: (id: number) => void }) {
   const queryClient = useQueryClient();
   const companies = useQuery({ queryKey: ["companies"], queryFn: api.companies });
-  const seed = useMutation({ mutationFn: api.seed, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["companies"] }) });
-  const upload = useMutation({ mutationFn: api.uploadFinancials, onSuccess: () => queryClient.invalidateQueries({ queryKey: ["companies"] }) });
+  const risk = useQuery({ queryKey: ["portfolio-risk"], queryFn: api.portfolioRisk });
+  const seed = useMutation({ mutationFn: api.seed, onSuccess: () => queryClient.invalidateQueries() });
+  const upload = useMutation({ mutationFn: api.uploadFinancials, onSuccess: () => queryClient.invalidateQueries() });
   const totalRevenue = companies.data?.reduce((sum, company) => sum + (company.latest_revenue ?? 0), 0) ?? 0;
   const totalDebt = companies.data?.reduce((sum, company) => sum + (company.latest_debt ?? 0), 0) ?? 0;
   const margin = companies.data?.filter((c) => c.ebitda_margin != null).reduce((sum, c) => sum + (c.ebitda_margin ?? 0), 0) ?? 0;
@@ -35,7 +39,31 @@ export function PortfolioDashboard({ onSelectCompany }: { onSelectCompany: (id: 
       {(seed.error || upload.error) && <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{(seed.error ?? upload.error)?.message}</div>}
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KpiCard label="Companies Analyzed" value={String(companies.data?.length ?? 0)} />
+        <KpiCard label="Companies Analyzed" value={String(risk.data?.total_companies ?? companies.data?.length ?? 0)} />
+        <KpiCard label="Total Exceptions" value={String(risk.data?.total_anomalies ?? 0)} />
+        <KpiCard label="Critical Exceptions" value={String(risk.data?.critical_exceptions ?? 0)} />
+        <KpiCard label="High-Risk Exceptions" value={String(risk.data?.high_risk_exceptions ?? 0)} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SeverityDistribution risk={risk.data} />
+        <CategoryDistribution risk={risk.data} />
+      </div>
+
+      <section className="rounded-md border border-line bg-white p-4 shadow-sm">
+        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Companies Requiring Review</h3>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+          {risk.data?.companies_requiring_review.map((item) => (
+            <button key={item.company_id} onClick={() => onSelectCompany(item.company_id)} className="rounded-md border border-line p-3 text-left hover:bg-slate-50">
+              <div className="font-semibold text-ink">{item.company_name}</div>
+              <div className="mt-1 text-sm text-slate-500">{item.exception_count} exceptions · score {item.risk_score}</div>
+            </button>
+          ))}
+          {!risk.data?.companies_requiring_review.length ? <div className="text-sm text-slate-500">Seed data to calculate review rankings.</div> : null}
+        </div>
+      </section>
+
+      <div className="grid gap-4 md:grid-cols-3">
         <KpiCard label="Latest Revenue" value={money(totalRevenue)} />
         <KpiCard label="Latest Debt" value={money(totalDebt)} />
         <KpiCard label="Avg EBITDA Margin" value={percent(avgMargin)} />
@@ -63,6 +91,9 @@ export function PortfolioDashboard({ onSelectCompany }: { onSelectCompany: (id: 
           ))}
         </div>
       </section>
+
+      <ExceptionCenter onOpenCompany={onSelectCompany} />
+      <ComparisonPage />
     </main>
   );
 }
